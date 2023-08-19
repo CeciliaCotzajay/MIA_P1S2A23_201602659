@@ -32,15 +32,16 @@ class principal(object):
             if(parametros[0] == "path"):
                 path_archivo = parametros[1]
                 print(path_archivo)
+                print("**********************************************************")
                 an = analizador()
                 with open(path_archivo) as file:
                     contenidoOriginal = file.read()
                     contenido = contenidoOriginal.lower()
                     listaInstrucciones = contenido.split('\n')
                     for a in listaInstrucciones:
-                        print("----------------")
+                        #print("----------------")
                         print(a)
                         an.analizar(a)
-        self.leer()
+        #self.leer()
 
 obj = principal()

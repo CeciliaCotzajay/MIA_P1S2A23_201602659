@@ -13,7 +13,7 @@ class analizador:
             valor = param[1]
              #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
             if (tipo == "size"):
-                disco.size = int(valor) 
+                disco.size = int(valor)
             elif (tipo == "path"):
                 disco.path = valor 
             elif (tipo == "unit"):
@@ -24,7 +24,7 @@ class analizador:
                 print(">>>>Error: parámetro no aceptado en 'mkdisk'.."+valor.upper()+">>>>")
                 print("**********************************************************")
          #SE CREA EL DISCO
-        disco.make_mkdisk(disco)
+        disco.make_mkdisk()
 
 
     def analizar(self, linea):
@@ -36,9 +36,10 @@ class analizador:
         token = comandos[0]
         if (token == "execute"):
             print("comando execute".upper())
+            #self.analizar_rep()
         elif (token == "mkdisk"):
             print("comando mkdisk".upper())
-            self.analizar_mkdisk()
+            self.analizar_mkdisk(comandos)
         elif (token == "rmdisk"):
             print("comando rmdisk".upper())
             #self.analizar_rep()
