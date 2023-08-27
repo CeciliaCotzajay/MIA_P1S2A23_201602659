@@ -1,13 +1,16 @@
+import time
+import random
+from estructuras import MBR
 import os
 
 class mkdisk:
-    position = 0
 
     def __init__(self):
         self.size = 0 #int
         self.path = "" #string
         self.fit = ""   #string 2
         self.unit = '' #char
+        self.particiones = []
 
     def make_mkdisk(self):
         #SI LOS PARAMETROS OBLIGATORIOS NO ESTAN VACIOS
@@ -17,7 +20,6 @@ class mkdisk:
                 # VALIDACION DE FIT
                 if(self.fit == ""):
                     self.fit = "ff"#FF
-                    self.fit = "ff"
                 if(self.fit == "bf" or self.fit == "ff" or self.fit == "wf"):
                     #VALIDACION DE UNIT
                     kb = 0
@@ -42,7 +44,7 @@ class mkdisk:
                             for i in range(0,self.size):
                                 file.write(b'\x00' * kb)
                             file.close()
-                        #self.inicializar_MBR()
+                        self.inicializar_MBR()
                         print("size: " + str(self.size))
                         print("path: " + self.path)
                         print("fit: " + self.fit)
@@ -75,16 +77,23 @@ class mkdisk:
                 self.path = palabra
 
 
-    """def inicializar_MBR(self):
-        with open("disco"+str(self.tamano)+".bin", "rb+") as file:
-            file.seek(self.position)
-            texto = f"{self.tamano}\n{self.fecha_creacion}\n{self.signature}\n"
-            file.write(texto.encode('utf-8'))
-            self.position = self.position+len(texto)
+    def inicializar_MBR(self):
+        date = self.obtener_time()
+        sign = random.randint(0,100)
+        nuevofit = self.fit[0]
+        with open(self.path, "rb+") as file:
+            mbr = MBR(self.size,date,sign,nuevofit)
+            bytes = mbr.get_bytes()
+            print(bytes)
+            file.write(bytes)
             file.close()
         print("MBR inicializado correctamente!")
+    
+    def obtener_time(self):
+        timeA = int(time.time())
+        return timeA
 
-    def leerMBR(self):
+    """def leerMBR(self):
         with open("disco"+str(self.tamano)+".bin", "rb+") as file:
             objeto_recuperado = file.read().decode('utf-8')
             atributos = objeto_recuperado.split("\n")
