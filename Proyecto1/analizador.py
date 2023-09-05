@@ -1,5 +1,6 @@
 from mkdisk import mkdisk
 from fdisk import fdisk
+from rep import rep
 
 class analizador:
 
@@ -54,10 +55,34 @@ class analizador:
             elif (tipo == "add"):
                 particion.add = int(valor)
             else:
-                print(">>>>Error: parámetro no aceptado en 'mkdisk'.."+valor.upper()+">>>>")
+                print(">>>>Error: parámetro no aceptado en 'fdisk'.."+valor.upper()+">>>>")
                 print("**********************************************************")
          #SE CREA LA PARTICION
         particion.make_fdisk()
+
+    def analizar_rep(self, parametros):
+        parametros.remove(parametros[0])
+        #INICIALIZA EL REPORTE
+        reporte = rep() 
+        for p in parametros:
+             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+            param = p.split('=')
+            tipo = param[0]
+            valor = param[1]
+             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+            if (tipo == "name"):
+                reporte.name = valor
+            elif (tipo == "path"):
+                reporte.path = valor 
+            elif (tipo == "id"):
+                reporte.ids = valor 
+            elif (tipo == "ruta"):
+                reporte.ruta = valor 
+            else:
+                print(">>>>Error: parámetro no aceptado en 'rep'.."+valor.upper()+">>>>")
+                print("**********************************************************")
+         #SE CREA EL REPORTE
+        reporte.make_rep()
 
     def analizar(self, linea):
         nueva_linea = linea.replace(" ","")
@@ -80,7 +105,7 @@ class analizador:
             self.analizar_fdisk(comandos)
         elif (token == "rep"):
             print("comando rep".upper())
-            #self.analizar_rep()
+            self.analizar_rep(comandos)
         elif (token == ""):
             print("", end='')
         else:

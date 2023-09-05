@@ -10,7 +10,6 @@ class mkdisk:
         self.path = "" #string
         self.fit = ""   #string 2
         self.unit = '' #char
-        self.particiones = []
 
     def make_mkdisk(self):
         #SI LOS PARAMETROS OBLIGATORIOS NO ESTAN VACIOS
@@ -67,6 +66,14 @@ class mkdisk:
         directorio = self.path.replace("\"","")
         list_dir = directorio.split('/')
         if(list_dir[1]  == "home"):
+            if(list_dir[2] == "user"):
+                list_dir[2] = "cecic"
+                list_dir.remove(list_dir[0])
+                for l in list_dir:
+                    palabra = palabra +"/"+ l
+                self.path = palabra
+        list_dir = self.path.split('/')
+        if(list_dir[1]  == "home"):
             if(list_dir[2] != "cecic"):
                 print(">Creando directorios")
                 list_dir.insert(2,"cecic")
@@ -75,6 +82,7 @@ class mkdisk:
                 for l in list_dir:
                     palabra = palabra +"/"+ l
                 self.path = palabra
+        print(self.path)
 
 
     def inicializar_MBR(self):
