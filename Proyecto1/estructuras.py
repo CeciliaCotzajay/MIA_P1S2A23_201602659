@@ -13,7 +13,7 @@ class Objeto(ABC):
         pass
 
 #*****************************************MBR**************************************************
-class MBR:
+class MBR(Objeto):
 
     def __init__(self, size, date, signature, fit): #125
         self.size = size # int (4 bytes)
@@ -21,6 +21,10 @@ class MBR:
         self.signature = signature # int (4 bytes)
         self.fit = fit # char (1 byte)
         self.partitions = [] #27bytes por cada una, 108 total
+        self.partitions.append(Partition('n',' ',' ',0,0,"                "))
+        self.partitions.append(Partition('n',' ',' ',0,0,"                "))
+        self.partitions.append(Partition('n',' ',' ',0,0,"                "))
+        self.partitions.append(Partition('n',' ',' ',0,0,"                "))
 
     def get_bytes(self):
         bytes = bytearray()
@@ -28,19 +32,27 @@ class MBR:
         bytes += self.date.to_bytes(8, byteorder='big')
         bytes += self.signature.to_bytes(4, byteorder='big')
         bytes += self.fit.encode('utf-8')
+        #print(len(bytes))
         for partition in self.partitions:
             bytes += partition.get_bytes()
+            #print(len(bytes))
         return bytes
 
     def set_bytes(self, bytes):
+        #print(len(bytes))
         self.size = int.from_bytes(bytes[0:4], byteorder='big')
         self.date = int.from_bytes(bytes[4:12], byteorder='big')
         self.signature = int.from_bytes(bytes[12:16], byteorder='big')
         self.fit = bytes[16:17].decode('utf-8')
-        self.partitions = []
-        for i in range(0,2):
-            temp = Partition("","")
-            self.partitions.append(temp.set_bytes(bytes[17:]))
+        self.partitions = [] #108,27
+        ini =17
+        fin =ini+27
+        for i in range(0,4):
+            temp = Partition(' ',' ',' ',0,0,"                ")
+            temp.set_bytes(bytes[ini:fin])
+            self.partitions.append(temp)
+            ini=fin
+            fin+=27
 
 
     def get_size(self):
@@ -49,18 +61,21 @@ class MBR:
         size += 8
         size += 4
         size += 1
+        for partition in self.partitions:
+            size += partition.get_size()
         return size
+            
     
 #*****************************************PARTITION********************************************
-class Partition:
+class Partition(Objeto):
 
     def __init__(self, status, type, fit, start, s, name):# 27
-        self.status = status #char (1 byte)
-        self.type = type #char (1 byte)
-        self.fit = fit #char (1 byte)
-        self.start = start #int (4 bytes)
-        self.s = s #int (4 bytes)
-        self.name = name #char (16 bytes)
+        self.status = status #char (1 byte) ; activa o no activa, 's','n'
+        self.type = type #char (1 byte)     ; p,e
+        self.fit = fit #char (1 byte)       ; f,b,w
+        self.start = start #int (4 bytes)   ; byte donde inicia
+        self.s = s #int (4 bytes)           ; tamanio bytes
+        self.name = name #char (16 bytes)   ; nombre
 
     def get_bytes(self):
         bytes = bytearray()

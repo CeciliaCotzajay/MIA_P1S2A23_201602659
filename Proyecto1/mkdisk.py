@@ -43,11 +43,7 @@ class mkdisk:
                             for i in range(0,self.size):
                                 file.write(b'\x00' * kb)
                             file.close()
-                        self.inicializar_MBR()
-                        print("size: " + str(self.size))
-                        print("path: " + self.path)
-                        print("fit: " + self.fit)
-                        print("unit: " + str(self.unit))
+                        self.inicializar_MBR(kb)
                         print(">>>>Disco creado exitosamente!>>>>")
                         print("**********************************************************")
                 else:
@@ -82,32 +78,24 @@ class mkdisk:
                 for l in list_dir:
                     palabra = palabra +"/"+ l
                 self.path = palabra
-        print(self.path)
+        #print(self.path)
 
 
-    def inicializar_MBR(self):
+    def inicializar_MBR(self,kb):
         date = self.obtener_time()
         sign = random.randint(0,100)
         nuevofit = self.fit[0]
+        nuevo_size = self.size*kb
         with open(self.path, "rb+") as file:
-            mbr = MBR(self.size,date,sign,nuevofit)
+            mbr = MBR(nuevo_size,date,sign,nuevofit)
             bytes = mbr.get_bytes()
-            print(bytes)
+            #print(bytes)
+            #print(len(bytes))
             file.write(bytes)
-            file.close()
         print("MBR inicializado correctamente!")
     
     def obtener_time(self):
         timeA = int(time.time())
         return timeA
 
-    """def leerMBR(self):
-        with open("disco"+str(self.tamano)+".bin", "rb+") as file:
-            objeto_recuperado = file.read().decode('utf-8')
-            atributos = objeto_recuperado.split("\n")
-            tam = int(atributos[0])
-            #tiempo = atributos[1]
-            sig = int(atributos[2])
-            print("Tipo: ",tam)
-            #print("Id: ",prof.id_profesor)
-            print("sig: ",sig)"""
+    
