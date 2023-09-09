@@ -1,5 +1,4 @@
-from estructuras import MBR
-from estructuras import Partition
+from estructuras import *
 
 class fdisk:
     aux_s = 0
@@ -41,7 +40,7 @@ class fdisk:
                         self.unit = "m"
                     else:
                         print(">>>>Error: unit debe ser 'B', 'K' o 'M'..>>>>")
-                        print("**********************************************************")
+                        print("*****************************************************************************")
                     if(kb != 0):
                         #AJUSTO EL SIZE
                         self.size = self.size * kb
@@ -55,53 +54,92 @@ class fdisk:
                                 # VERIFICAR NO EXISTENCIA DE NOMBRE DE PARTICION
                                 if(self.buscar_particion(self.name,mbr)):
                                     print(">>>>Ya existe una partición con ese nombre>>>>")
-                                    print("**********************************************************")
+                                    print("*****************************************************************************")
                                 else:
                                     #INSERTO SOLO CON FIRST-FIT
+                                    if(self.type == 'p' or self.type == 'e'):
                                         part_position = self.first_fit(mbr)
                                         if(mbr.partitions[part_position].status == 'n'):
-                                            #INSERTA LA PARTICION
                                             if(self.type == 'p'):  #PRIMARIA
                                                 self.insertar_P_E(part_position,mbr)
                                                 print(">>>>Particion Primaria creada exitosamente!>>>>")
-                                                print("**********************************************************")
+                                                print("*****************************************************************************")
                                             if(self.type == 'e'):  #EXTENDIDA
                                                 if(self.buscar_extendida(mbr)):
                                                     print(">>>>Ya existe una Particion extendida en el disco>>>>")
-                                                    print("**********************************************************")
+                                                    print("*****************************************************************************")
                                                 else:
                                                     self.insertar_P_E(part_position,mbr)
+                                                    #INSERTAR EBR
                                                     print(">>>>Particion Extendida creada exitosamente!>>>>")
-                                                    print("**********************************************************")
+                                                    print("*****************************************************************************")
                                         else:
                                             print(">>>>Ya no hay espacio disponible>>>>")
-                                            print("**********************************************************")
+                                            print("*****************************************************************************")
+
+                                    if(self.type == 'l'):  #LOGICA
+                                        if(self.buscar_extendida(mbr)):
+                                            self.insertar_logica(mbr)
+                                            print(">>>>Particion Logica creada exitosamente!>>>>")
+                                            print("*****************************************************************************")
+
+                                        else:
+                                            print(">>>>No existe una Particion extendida en el disco>>>>")
+                                            print("*****************************************************************************")
                             else:
                                 print(">>>>Error: No se encontró el disco>>>>")
-                                print("**********************************************************")
+                                print("*****************************************************************************")
                         else:
                             print(">>>>Error: type debe ser 'P' o 'E' o 'L'..>>>>")
-                            print("**********************************************************")
+                            print("*****************************************************************************")
                 else:
                     print(">>>>Error: fit debe ser 'BF' o 'FF' o 'WF'..>>>>")
-                    print("**********************************************************")
+                    print("*****************************************************************************")
             else:
                 print(">>>>Error: La partición no puede tener tamaño: " + self.size + ">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
         
         else:
             print(">>>>Error: parámetros obligatorios: size, path y name>>>>")
-            print("**********************************************************")
+            print("*****************************************************************************")
         
     def verificarDirectorio(self):
-        directorio = self.path.replace("\"","")
-        self.path = directorio
+        self.arreglar_Directorio()
         try:
             with open(self.path, "rb+") as file:
                 file.close()
                 return True
         except:
             return False
+    
+    def arreglar_Directorio(self):
+        palabra = ""
+        directorio = self.path.replace("\"","")
+        self.path = directorio
+        list_dir = directorio.split('/')
+        if(list_dir[1]  != "home"):
+            list_dir.insert(1,"home")
+            list_dir.remove(list_dir[0])
+            for l in list_dir:
+                palabra = palabra +"/"+ l
+            self.path = palabra
+            palabra = ""
+        if(list_dir[1]  == "home"):
+            if(list_dir[2] == "user"):
+                list_dir[2] = "cecic"
+                list_dir.remove(list_dir[0])
+                for l in list_dir:
+                    palabra = palabra +"/"+ l
+                self.path = palabra
+                palabra = ""
+        list_dir = self.path.split('/')
+        if(list_dir[1]  == "home"):
+            if(list_dir[2] != "cecic"):
+                list_dir.insert(2,"cecic")
+                list_dir.remove(list_dir[0])
+                for l in list_dir:
+                    palabra = palabra +"/"+ l
+                self.path = palabra
         
     def obtener_mbr(self):
         mbr = MBR(0,0,0,' ')
@@ -139,16 +177,23 @@ class fdisk:
     
     def insertar_P_E(self,part_position,mbr):
         #AJUSTAR_CADENAS
+        self.name = self.name.replace("\"","")
         self.name = self.ajustar_cadena(16,self.name)
         self.fit = self.ajustar_cadena(1,self.fit)
-        #CREA PARTICION     
+        #CREA PARTICION
         par_set = Partition('s',self.type,self.fit,self.aux_s,self.size,self.name)
         mbr.partitions[part_position] = par_set
         with open(self.path, "rb+") as file:
             bytes = mbr.get_bytes()
-            #print(bytes)
-            #print(len(bytes))
             file.write(bytes)
+            # SOLO SI ES EXTENDIDA
+            if(self.type == 'e'):
+                #CREA PRIMER EBR
+                ebr = EBR('n',' ',self.aux_s,0,0,"                ")
+                bytes_ebr = ebr.get_bytes()
+                file.seek(self.aux_s)
+                file.write(bytes_ebr)
+        
 
     def ajustar_cadena(self,tam,cadena):
         if(len(cadena)<tam):
@@ -160,5 +205,48 @@ class fdisk:
             for i in range(0,tam):
                 new_cadena = new_cadena + cadena[i]
             cadena = new_cadena
-        #print(cadena, "tam: ",str(len(cadena)))
         return cadena
+    
+    def first_fit_logica(self, mbr):
+        p = Partition('n',' ',' ',0,0,"                ")
+        for part in mbr.partitions:
+            if(part.type == 'e'):
+                p = part
+        return p
+    
+    def modificar_EBR(self,ebr,fit):
+        #AJUSTAR_CADENAS
+        self.name = self.name.replace("\"","")
+        self.name = self.ajustar_cadena(16,self.name)
+        self.fit = self.ajustar_cadena(1,self.fit)
+        ebr.status = 's'
+        ebr.fit = fit
+        ebr.s = self.size
+        ebr.nextB = ebr.start + ebr.s
+        ebr.name = self.name
+        return ebr
+    
+    def insertar_logica(self,mbr):
+        p_e = self.first_fit_logica(mbr)
+        ebr_act = EBR('n',' ',0,0,0,"                ")
+        bytes_act = ebr_act.get_bytes()
+        with open(self.path, "rb+") as file:
+            #PRIMER EBR
+            file.seek(p_e.start)
+            bytes_obtenidos = file.read(len(bytes_act))
+            ebr_act.set_bytes(bytes_obtenidos)
+            if(ebr_act.status == 'n'):
+                #MODIFICO PRIMER EBR
+                #COLOCO LA POSICION DEL PUNTERO EN POSITION, SI LO PONGO DIRECTO NO FUNCIONA, LE DA ANSIEDAD
+                position = int(p_e.start)
+                ebr_act = self.modificar_EBR(ebr_act,p_e.fit)
+                bytes_ebr_act = ebr_act.get_bytes()
+                file.seek(position)
+                file.write(bytes_ebr_act)
+                #CREO EBR SIGUIENTE (ULTIMO)
+                #COLOCO LA POSICION DEL PUNTERO EN POSITION_ULTIMO, SI LO PONGO DIRECTO NO FUNCIONA, LE DA ANSIEDAD
+                position_ultimo = int(ebr_act.nextB)
+                nue_ebr = EBR('n',' ',ebr_act.nextB,0,0,"                ")
+                bytes_nue_ebr = nue_ebr.get_bytes()
+                file.seek(position_ultimo)
+                file.write(bytes_nue_ebr)

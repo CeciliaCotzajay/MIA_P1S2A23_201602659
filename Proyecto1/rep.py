@@ -42,10 +42,10 @@ class rep:
                 self.make_Rls(directorio)
             else:
                 print(">>>>Error: nombre no aceptado en 'rep'.."+self.name.upper()+">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
         else:
             print(">>>>Error: parámetros obligatorios: name, path e id>>>>")
-            print("**********************************************************")
+            print("*****************************************************************************")
 
     def verificarDirectorio(self):
         palabra = ""
@@ -80,7 +80,7 @@ class rep:
                 file.write(b'\x00' * kb)
             print("unit: " + str(self.unit))
             print(">>>>Reporte MBR generado exitosamente!>>>>")
-            print("**********************************************************")
+            print("*****************************************************************************")
         
     
     def make_Rdisk(self, directorio):

@@ -70,8 +70,8 @@ class MBR(Objeto):
 class Partition(Objeto):
 
     def __init__(self, status, type, fit, start, s, name):# 27
-        self.status = status #char (1 byte) ; activa o no activa, 's','n'
-        self.type = type #char (1 byte)     ; p,e
+        self.status = status #char (1 byte) ; activa o no activa, 's','n','m',e'
+        self.type = type #char (1 byte)     ; p,e,l
         self.fit = fit #char (1 byte)       ; f,b,w
         self.start = start #int (4 bytes)   ; byte donde inicia
         self.s = s #int (4 bytes)           ; tamanio bytes
@@ -100,6 +100,49 @@ class Partition(Objeto):
         size += 1
         size += 1
         size += 1
+        size += 4
+        size += 4
+        size += 16
+        return size
+    
+#*****************************************PARTITION********************************************
+
+class EBR(Objeto):
+
+    def __init__(self,status,fit,start,s,nextB,name):#30
+        self.status = status # char (1 byte)    ; activa o no activa, 's','n','m',e'
+        self.fit = fit # char (1 byte)          ; b,f,w
+        self.start = start # int (4 bytes)      ; byte donde inicia
+        self.s = s # int (4 bytes)              ; tamanio bytes
+        self.nextB = nextB # int (4 bytes)      ; byte donde inicia el siguiente EBR
+        self.name = name #char (16 bytes)       ; nombre
+
+    def get_bytes(self):
+        bytes = bytearray()
+        bytes += self.status.encode('utf-8')
+        bytes += self.fit.encode('utf-8')
+        bytes += self.start.to_bytes(4, byteorder='big')
+        bytes += self.s.to_bytes(4, byteorder='big')
+        bytes += self.nextB.to_bytes(4, byteorder='big')
+        bytes += self.name.encode('utf-8')
+        #print(len(bytes))
+        return bytes
+
+    def set_bytes(self, bytes):
+        #print(len(bytes))
+        self.status = bytes[0:1].decode('utf-8')
+        self.fit = bytes[1:2].decode('utf-8')
+        self.start = int.from_bytes(bytes[2:6], byteorder='big')
+        self.s = int.from_bytes(bytes[6:10], byteorder='big')
+        self.nextB = int.from_bytes(bytes[10:14], byteorder='big')
+        self.name = bytes[14:30].decode('utf-8')
+
+
+    def get_size(self):
+        size = 0
+        size += 1
+        size += 1
+        size += 4
         size += 4
         size += 4
         size += 16

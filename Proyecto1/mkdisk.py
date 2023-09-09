@@ -31,7 +31,7 @@ class mkdisk:
                         self.unit = "m"
                     else:
                         print(">>>>Error: unit debe ser 'K' o 'M'..>>>>")
-                        print("**********************************************************")
+                        print("*****************************************************************************")
                     if(kb != 0):
                         # EXTRAIGO DIRECTORIO PARA VER SI EXISTE
                         self.verificarDirectorio()
@@ -45,22 +45,30 @@ class mkdisk:
                             file.close()
                         self.inicializar_MBR(kb)
                         print(">>>>Disco creado exitosamente!>>>>")
-                        print("**********************************************************")
+                        print("*****************************************************************************")
                 else:
                     print(">>>>Error: fit debe ser 'BF' o 'FF' o 'WF'..>>>>")
-                    print("**********************************************************")
+                    print("*****************************************************************************")
             else:
                 print(">>>>Error: El disco no puede tener tamaño: " + self.size + ">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
         
         else:
             print(">>>>Error: parámetros obligatorios: size y path>>>>")
-            print("**********************************************************")
+            print("*****************************************************************************")
             
     def verificarDirectorio(self):
         palabra = ""
         directorio = self.path.replace("\"","")
+        self.path = directorio
         list_dir = directorio.split('/')
+        if(list_dir[1]  != "home"):
+            list_dir.insert(1,"home")
+            list_dir.remove(list_dir[0])
+            for l in list_dir:
+                palabra = palabra +"/"+ l
+            self.path = palabra
+            palabra = ""
         if(list_dir[1]  == "home"):
             if(list_dir[2] == "user"):
                 list_dir[2] = "cecic"
@@ -68,6 +76,7 @@ class mkdisk:
                 for l in list_dir:
                     palabra = palabra +"/"+ l
                 self.path = palabra
+                palabra = ""
         list_dir = self.path.split('/')
         if(list_dir[1]  == "home"):
             if(list_dir[2] != "cecic"):

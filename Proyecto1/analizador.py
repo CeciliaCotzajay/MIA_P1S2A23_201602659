@@ -24,7 +24,7 @@ class analizador:
                 disco.fit = valor 
             else:
                 print(">>>>Error: parámetro no aceptado en 'mkdisk'.."+valor.upper()+">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
          #SE CREA EL DISCO
         disco.make_mkdisk()
 
@@ -53,10 +53,13 @@ class analizador:
             elif (tipo == "delete"):
                 particion.delete = valor 
             elif (tipo == "add"):
+                if(valor == ''):
+                    valor = '0'
+                    p = 'add=0'
                 particion.add = int(valor)
             else:
                 print(">>>>Error: parámetro no aceptado en 'fdisk'.."+valor.upper()+">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
          #SE CREA LA PARTICION
         particion.make_fdisk()
 
@@ -80,7 +83,7 @@ class analizador:
                 reporte.ruta = valor 
             else:
                 print(">>>>Error: parámetro no aceptado en 'rep'.."+valor.upper()+">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")
          #SE CREA EL REPORTE
         reporte.make_rep()
 
@@ -113,4 +116,4 @@ class analizador:
                 print("",end="")
             else:
                 print(">>>>Error: comando no aceptado.."+token.upper()+">>>>")
-                print("**********************************************************")
+                print("*****************************************************************************")

@@ -22,7 +22,7 @@ class principal(object):
 
     def leer(self):
         os.system('clear')
-        print("*****************************************************************************")
+        print("***************************************************************************************")
         path_archivo_Execute = input("Esperando comando:  ")
         cad_sin_espacios = path_archivo_Execute.replace(" ","")
         archivo_execute = cad_sin_espacios.split('-')
@@ -32,7 +32,7 @@ class principal(object):
             if(parametros[0] == "path"):
                 path_archivo = parametros[1]
                 print(path_archivo)
-                print("**********************************************************")
+                print("*****************************************************************************")
                 an = analizador()
                 with open(path_archivo) as file:
                     contenidoOriginal = file.read()
