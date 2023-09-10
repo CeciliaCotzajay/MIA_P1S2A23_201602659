@@ -250,3 +250,30 @@ class fdisk:
                 bytes_nue_ebr = nue_ebr.get_bytes()
                 file.seek(position_ultimo)
                 file.write(bytes_nue_ebr)
+            else:
+                buscar = True
+                pos = ebr_act.nextB
+                ebr_rec = EBR('n',' ',0,0,0,"                ")
+                bytes_ebr_rec = ebr_rec.get_bytes()
+                while(buscar):
+                    file.seek(pos)
+                    bytes_rec = file.read(len(bytes_ebr_rec))
+                    ebr_rec.set_bytes(bytes_rec)
+                    if(ebr_rec.status == 'n'):
+                        #MODIFICO EBR ACTUAL
+                        #COLOCO LA POSICION DEL PUNTERO EN POSITION, SI LO PONGO DIRECTO NO FUNCIONA, LE DA ANSIEDAD
+                        position = int(ebr_rec.start)
+                        ebr_rec = self.modificar_EBR(ebr_rec,p_e.fit)
+                        bytes_ebr_rec2 = ebr_rec.get_bytes()
+                        file.seek(position)
+                        file.write(bytes_ebr_rec2)
+                        #CREO EBR SIGUIENTE (ULTIMO)
+                        #COLOCO LA POSICION DEL PUNTERO EN POSITION_ULTIMO, SI LO PONGO DIRECTO NO FUNCIONA, LE DA ANSIEDAD
+                        position_ultimo = int(ebr_rec.nextB)
+                        nue_ebr = EBR('n',' ',ebr_rec.nextB,0,0,"                ")
+                        bytes_nue_ebr = nue_ebr.get_bytes()
+                        file.seek(position_ultimo)
+                        file.write(bytes_nue_ebr)
+                        buscar = False
+                    else:
+                        pos = ebr_rec.nextB
