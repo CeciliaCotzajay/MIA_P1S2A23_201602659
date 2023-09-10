@@ -32,34 +32,37 @@ class analizador:
         parametros.remove(parametros[0])
         #INICIALIZA LA PARTICION
         particion = fdisk() 
-        for p in parametros:
-             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
-            param = p.split('=')
-            tipo = param[0]
-            valor = param[1]
-             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
-            if (tipo == "size"):
-                particion.size = int(valor)
-            elif (tipo == "path"):
-                particion.path = valor 
-            elif (tipo == "name"):
-                particion.name = valor 
-            elif (tipo == "unit"):
-                particion.unit = valor
-            elif (tipo == "type"):
-                particion.type = valor
-            elif (tipo == "fit"):
-                particion.fit = valor 
-            elif (tipo == "delete"):
-                particion.delete = valor 
-            elif (tipo == "add"):
-                if(valor == ''):
-                    valor = '0'
-                    p = 'add=0'
-                particion.add = int(valor)
-            else:
-                print(">>>>Error: parámetro no aceptado en 'fdisk'.."+valor.upper()+">>>>")
-                print("*****************************************************************************")
+        try:
+            for p in parametros:
+                #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+                param = p.split('=')
+                tipo = param[0]
+                valor = param[1]
+                #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+                if (tipo == "size"):
+                    particion.size = int(valor)
+                elif (tipo == "path"):
+                    particion.path = valor 
+                elif (tipo == "name"):
+                    particion.name = valor 
+                elif (tipo == "unit"):
+                    particion.unit = valor
+                elif (tipo == "type"):
+                    particion.type = valor
+                elif (tipo == "fit"):
+                    particion.fit = valor 
+                elif (tipo == "delete"):
+                    particion.delete = valor 
+                elif (tipo == "add"):
+                    if(valor == ''):
+                        valor = '0'
+                    particion.add = int(valor)
+                else:
+                    print(">>>>Error: parámetro no aceptado en 'fdisk'.."+valor.upper()+">>>>")
+                    print("*****************************************************************************")
+        except:
+            print(">>>>Error: Recuperandose..>>>>")
+            print("*****************************************************************************")
          #SE CREA LA PARTICION
         particion.make_fdisk()
 

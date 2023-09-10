@@ -12,7 +12,8 @@ class m(object):
     def __init__(self):
         #self.presentar()
         #self.crear_rep2()
-        self.bytesss()
+        #self.bytesss()
+        self.devolver_kb()
         self.path = ""
 
     def presentar(self):
@@ -131,6 +132,26 @@ class m(object):
             fit = new_fit
         print(fit, "tam: ",str(len(fit)))
 
+    def devolver_kb(self):
+        dif = 5242880
+        letra = ''
+        m = 1024*1024
+        k = 1024
+        print(str(dif//m))
+        print(str(dif//k))
+        entero_m = dif//m
+        entero_k = dif//k
+        if(entero_k == 0 and entero_m != 0):
+            print('m')
+        elif(entero_m == 0 and entero_k != 0):
+            print('k')
+        elif(entero_m != 0 and entero_k != 0):
+            if(entero_m<entero_k):
+                print('m')
+            else:
+                print('k')
+        else:
+            print('b')
 
 
 

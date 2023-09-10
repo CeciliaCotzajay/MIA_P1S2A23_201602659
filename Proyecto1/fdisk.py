@@ -15,12 +15,32 @@ class fdisk:
 
 
     def make_fdisk(self):
-        print("haciendo fdisk")
-        #debe obtener el disco a traves del path o el nombre
-        #del disco para hacer la respectiva insercion(modificacion de MBR)
-        # OJO LO QUE SE modifica es el mbr y se crea el disco pero no se donde se guarda
+        print(">Haciendo fdisk")
+        #VALIDA PARAMETRO ADD
+        if(self.add != 0):
+            print(">>>>Parametro add>>>>")
+            print("*****************************************************************************")
+        #VALIDA PARAMETRO FULL
+        elif(self.delete == "full"):
+            # VERIFICAR EXISTENCIA DE PATH
+            if(self.verificarDirectorio()):
+                mbr = self.obtener_mbr()
+                # VERIFICAR EXISTENCIA DE NOMBRE DE PARTICION
+                if(self.buscar_particion(self.name,mbr)):
+                    if(self.eliminar_Partition(mbr)):
+                        print(">>>>Particion Eliminada exitosamente!>>>>")
+                        print("*****************************************************************************")
+                    else:
+                        print(">>>>No se elimino la Particion>>>>")
+                        print("*****************************************************************************")
+                else:
+                    print(">>>>No existe una partición con ese nombre>>>>")
+                    print("*****************************************************************************")
+            else:
+                print(">>>>Error: No se encontró el disco>>>>")
+                print("*****************************************************************************")
         #SI LOS PARAMETROS OBLIGATORIOS NO ESTAN VACIOS
-        if(self.size != 0 and self.path != "" and self.name != ""):
+        elif(self.size != 0 and self.path != "" and self.name != ""):
             #SI EL TAMAÑO DE LA PARTICION ES MAYOR A 0
             if(self.size > 0):
                 # VALIDACION DE FIT
@@ -59,7 +79,7 @@ class fdisk:
                                     #INSERTO SOLO CON FIRST-FIT
                                     if(self.type == 'p' or self.type == 'e'):
                                         part_position = self.first_fit(mbr)
-                                        if(mbr.partitions[part_position].status == 'n'):
+                                        if((mbr.partitions[part_position].status == 'n')or(mbr.partitions[part_position].status == 'e')):
                                             if(self.type == 'p'):  #PRIMARIA
                                                 self.insertar_P_E(part_position,mbr)
                                                 print(">>>>Particion Primaria creada exitosamente!>>>>")
@@ -98,9 +118,8 @@ class fdisk:
             else:
                 print(">>>>Error: La partición no puede tener tamaño: " + self.size + ">>>>")
                 print("*****************************************************************************")
-        
         else:
-            print(">>>>Error: parámetros obligatorios: size, path y name>>>>")
+            print(">>>>Error: parámetros obligatorios: size, path y name | full en delete>>>>")
             print("*****************************************************************************")
         
     def verificarDirectorio(self):
@@ -153,6 +172,8 @@ class fdisk:
         return mbr_aux
     
     def buscar_particion(self, nombre, mbr):
+        nombre = nombre.replace("\"","")
+        nombre = self.ajustar_cadena(16,nombre)
         for part in mbr.partitions:
             if(part.name == nombre):
                 return True
@@ -162,7 +183,7 @@ class fdisk:
         self.aux_s = 126
         part_position = 0
         for part in mbr.partitions:
-            if(part.status == 'n'):
+            if((part.status == 'n')or(part.status == 'e')):
                 break
             else:
                 self.aux_s = self.aux_s + part.s
@@ -193,8 +214,8 @@ class fdisk:
                 bytes_ebr = ebr.get_bytes()
                 file.seek(self.aux_s)
                 file.write(bytes_ebr)
+                print("EBR inicializado correctamente!")
         
-
     def ajustar_cadena(self,tam,cadena):
         if(len(cadena)<tam):
             dif = tam-len(cadena)
@@ -277,3 +298,46 @@ class fdisk:
                         buscar = False
                     else:
                         pos = ebr_rec.nextB
+
+    def eliminar_Partition(self,mbr):
+        self.name = self.name.replace("\"","")
+        self.name = self.ajustar_cadena(16,self.name)
+        for part in mbr.partitions:
+            if(part.name == self.name):
+                #CAMBIO STATUS A ELIMINADA
+                part.status = 'e'
+                part.type =''
+                pos = part.start
+                pos2 = part.s
+                dif = pos2 - pos
+                cad = self.obtener_kb(dif).split(',')
+                kb = int(cad[0])
+                size_ac = int(cad[1])
+                with open(self.path, "rb+") as file:
+                    bytes = mbr.get_bytes()
+                    file.write(bytes)
+                    file.seek(pos)
+                    for i in range(pos,size_ac):
+                        file.write(b'\x00' * kb)
+                    file.close()
+                    return True
+        return False
+    
+    def obtener_kb(self, dif):
+        cad = ""
+        m = 1024*1024
+        k = 1024
+        entero_m = dif//m
+        entero_k = dif//k
+        if(entero_k == 0 and entero_m != 0):
+            cad = str(m)+","+str(entero_m)
+        elif(entero_m == 0 and entero_k != 0):
+            cad = str(k)+","+str(entero_k)
+        elif(entero_m != 0 and entero_k != 0):
+            if(entero_m<entero_k):
+                cad = str(m)+","+str(entero_m)
+            else:
+                cad = str(k)+","+str(entero_k)
+        else:
+            cad = "1"+","+str(dif)
+        return cad
