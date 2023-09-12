@@ -145,6 +145,7 @@ class mount:
     def recorrer(self):
         if(singleton.objL.list_Mounts):
             for m in singleton.objL.list_Mounts:
-                print(m.idmount," ->")
+                print(m.idmount,end="-->")
+            print("")
     
 

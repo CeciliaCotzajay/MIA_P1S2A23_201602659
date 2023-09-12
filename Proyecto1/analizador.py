@@ -3,6 +3,7 @@ from rmdisk import rmdisk
 from fdisk import fdisk
 from rep import rep
 from mount import mount
+from unmount import unmount
 
 class analizador:
 
@@ -130,6 +131,24 @@ class analizador:
          #SE CREA EL DISCO
         mo.make_mount()
 
+    def analizar_unmount(self, parametros):
+        parametros.remove(parametros[0])
+        #INICIALIZA EL DISCRO
+        mo = unmount() 
+        for p in parametros:
+             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+            param = p.split('=')
+            tipo = param[0]
+            valor = param[1]
+             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+            if (tipo == "id"):
+                mo.idm = valor 
+            else:
+                print(">>>>Error: parámetro no aceptado en 'unmount': "+valor.upper()+">>>>")
+                print("*****************************************************************************")
+         #SE CREA EL DISCO
+        mo.make_unmount()
+    
     def analizar(self, linea):
         nueva_linea = linea.replace(" ","")
         try:
@@ -155,6 +174,9 @@ class analizador:
         elif (token == "mount"):
             print("comando mount".upper())
             self.analizar_mount(comandos)
+        elif (token == "unmount"):
+            print("comando unmount".upper())
+            self.analizar_unmount(comandos)
         elif (token == ""):
             print("", end='')
         else:
