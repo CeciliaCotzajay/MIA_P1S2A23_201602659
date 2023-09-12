@@ -2,6 +2,7 @@ from mkdisk import mkdisk
 from rmdisk import rmdisk
 from fdisk import fdisk
 from rep import rep
+from mount import mount
 
 class analizador:
 
@@ -24,7 +25,7 @@ class analizador:
             elif (tipo == "fit"):
                 disco.fit = valor 
             else:
-                print(">>>>Error: parámetro no aceptado en 'mkdisk'.."+valor.upper()+">>>>")
+                print(">>>>Error: parámetro no aceptado en 'mkdisk': "+valor.upper()+">>>>")
                 print("*****************************************************************************")
          #SE CREA EL DISCO
         disco.make_mkdisk()
@@ -42,7 +43,7 @@ class analizador:
             if (tipo == "path"):
                 disco.path = valor 
             else:
-                print(">>>>Error: parámetro no aceptado en 'rmdisk'.."+valor.upper()+">>>>")
+                print(">>>>Error: parámetro no aceptado en 'rmdisk': "+valor.upper()+">>>>")
                 print("*****************************************************************************")
          #SE CREA EL DISCO
         disco.make_rmdisk()
@@ -77,7 +78,7 @@ class analizador:
                         valor = '0'
                     particion.add = int(valor)
                 else:
-                    print(">>>>Error: parámetro no aceptado en 'fdisk'.."+valor.upper()+">>>>")
+                    print(">>>>Error: parámetro no aceptado en 'fdisk': "+valor.upper()+">>>>")
                     print("*****************************************************************************")
         except:
             print(">>>>Error: Recuperandose..>>>>")
@@ -104,10 +105,30 @@ class analizador:
             elif (tipo == "ruta"):
                 reporte.ruta = valor 
             else:
-                print(">>>>Error: parámetro no aceptado en 'rep'.."+valor.upper()+">>>>")
+                print(">>>>Error: parámetro no aceptado en 'rep': "+valor.upper()+">>>>")
                 print("*****************************************************************************")
          #SE CREA EL REPORTE
         reporte.make_rep()
+
+    def analizar_mount(self, parametros):
+        parametros.remove(parametros[0])
+        #INICIALIZA
+        mo = mount() 
+        for p in parametros:
+             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+            param = p.split('=')
+            tipo = param[0]
+            valor = param[1]
+             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+            if (tipo == "path"):
+                mo.path = valor 
+            elif (tipo == "name"):
+                mo.name = valor 
+            else:
+                print(">>>>Error: parámetro no aceptado en 'mount': "+valor.upper()+">>>>")
+                print("*****************************************************************************")
+         #SE CREA EL DISCO
+        mo.make_mount()
 
     def analizar(self, linea):
         nueva_linea = linea.replace(" ","")
@@ -131,6 +152,9 @@ class analizador:
         elif (token == "rep"):
             print("comando rep".upper())
             self.analizar_rep(comandos)
+        elif (token == "mount"):
+            print("comando mount".upper())
+            self.analizar_mount(comandos)
         elif (token == ""):
             print("", end='')
         else:
