@@ -1,4 +1,5 @@
 
+from datetime import datetime
 import os
 import time
 from PIL import Image
@@ -10,11 +11,21 @@ import imgkit
 class m(object):
 
     def __init__(self):
-        #self.presentar()
+        self.presentar2()
         #self.crear_rep2()
         #self.bytesss()
-        self.devolver_kb()
+        #self.devolver_kb()
         self.path = ""
+
+    def presentar2(self):
+        #
+        timestamp = int(time.time())
+        fecha = datetime.fromtimestamp(timestamp)
+        print(fecha.strftime("%d/%m/%y %H:%M"))
+        #cad = time.strftime("%c")
+        #print(timestamp)
+        #timestamp.
+        ##
 
     def presentar(self):
         #
@@ -70,30 +81,38 @@ class m(object):
 
     def crear_rep2(self):
         # Esquema del "documento" que vamos a crear con la tabla
+        color ="purple"
         layout ="""        
         <html><head>
         <style>
         .dataframe {
             font-family: "Liberation Sans", Arial, helvetica, sans-serif;
-            color: white;
+            color: Purple;
             border-collapse: collapse;
             border: 1px solid grey;
         }
         .dataframe thead {
-            background-color: #006080;
+            background-color: """+color+""";
+            color: white;
         }
         .dataframe th, td {
             padding: 5pt;
+        }
+        .dataframe td {
+            padding: 5pt;
+            background-color: #d4e3ec;
         }
         .center-table {
         margin: 0 auto;
         }
         </style>
         </head>
-        <body>
-        <table class="center-table">
+        <body style="background-color: black;">
+        <center>
+        <table>
           %s    <!--  Aqui se inserta la tabla -->
         </table>
+        </center>
         </body>
         </html>"""
 
@@ -103,7 +122,7 @@ class m(object):
         cuadro = layout % df.to_html(index=False,justify='center')
 
         # Guardar en un fichero png la imagen de la tabla anterior
-        imgkit.from_string(cuadro, "tabla.png", {"xvfb": "", "transparent": ""})
+        imgkit.from_string(cuadro, "tabla.png", {"xvfb": ""})
 
         # Leer el fichero y pegarlo encima de nuestra imagen
         
@@ -153,6 +172,74 @@ class m(object):
         else:
             print('b')
 
+    def crear_rep22(self):
+        # Esquema del "documento" que vamos a crear con la tabla
+        layout ="""        
+        <html><head>
+        <style>
+        .dataframe {
+            font-family: "Liberation Sans", Arial, helvetica, sans-serif;
+            color: white;
+            border-collapse: collapse;
+            border: 1px solid grey;
+        }
+        .dataframe thead {
+            background-color: #006080;
+        }
+        .dataframe th, td {
+            padding: 5pt;
+        }
+        .center-table {
+        margin: 0 auto;
+        }
+        </style>
+        </head>
+        <body>
+        <table class="center-table">
+<tr>
+<td>enc1</td>
+<td>enc2</td>
+<td>enc3</td>
+<td>enc4</td>
+</tr>
+<tr>
+<td>f2c1</td>
+<td>f2c2</td>
+<td>f2c3</td>
+<td>f2c4</td>
+</tr>
+<tr>
+<td>f3c1</td>
+<td>f3c2</td>
+<td>f3c3</td>
+<td>f3c4</td>
+</tr>
+<tr>
+<td>f4c1</td>
+<td>f4c2</td>
+<td>f4c3</td>
+<td>f4c4</td>
+</tr>
+</table>
+        </body>
+        </html>"""
+
+        """dt =  {'column1':["AA","BBBB","CCC","DDDDD"],'column2':[143.40,144.60,153.40,92.50],'column3':[144.21,142.60,155.65,92.77]}
+        df = pd.DataFrame(data=dt)
+
+        cuadro = layout % df.to_html(index=False,justify='center')"""
+
+        # Guardar en un fichero png la imagen de la tabla anterior
+        imgkit.from_string(layout, "tabla.png", {"xvfb": "", "transparent": ""})
+
+        # Leer el fichero y pegarlo encima de nuestra imagen
+        
+        img = Image.new('RGB', (800, 300), color = '#000080')
+        draw = ImageDraw.Draw(img)
+        img_tabla = Image.open("tabla.png")
+        img.paste(img_tabla, (50, 40), img_tabla)
+
+ 
 
 
 

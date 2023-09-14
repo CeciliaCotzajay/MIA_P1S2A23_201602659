@@ -4,9 +4,10 @@ import singleton
 
 class mountid:
     
-    def __init__(self, idmount,path):
+    def __init__(self, idmount,path,name):
         self.idmount = idmount
         self.path = path
+        self.name = name
     
 
 class mount:
@@ -29,7 +30,7 @@ class mount:
                     disk = disklist[0]
                     #NUMERO DE CARNET 201602659
                     idM = "59"+str(position)+disk
-                    new_mount = mountid(idM,self.path)
+                    new_mount = mountid(idM,self.path,self.name)
                     #METODO VERIFICA LA NO EXISTENCIA DE IDMOUNT Y LAS GUARDA
                     self.insertar_mount(new_mount)
                 else:
@@ -124,6 +125,7 @@ class mount:
         part_position = 0
         nombre = nombre.replace("\"","")
         nombre = self.ajustar_cadena(16,nombre)
+        self.name = nombre
         for part in mbr.partitions:
             if(part.name == nombre):
                 break
@@ -147,5 +149,7 @@ class mount:
             for m in singleton.objL.list_Mounts:
                 print(m.idmount,end="-->")
             print("")
+        else:
+            print("sin ids mount")
     
 

@@ -114,22 +114,27 @@ class analizador:
     def analizar_mount(self, parametros):
         parametros.remove(parametros[0])
         #INICIALIZA
-        mo = mount() 
-        for p in parametros:
-             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
-            param = p.split('=')
-            tipo = param[0]
-            valor = param[1]
-             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
-            if (tipo == "path"):
-                mo.path = valor 
-            elif (tipo == "name"):
-                mo.name = valor 
-            else:
-                print(">>>>Error: parámetro no aceptado en 'mount': "+valor.upper()+">>>>")
-                print("*****************************************************************************")
-         #SE CREA EL DISCO
-        mo.make_mount()
+        mo = mount()
+        #IMPRIME LOS IDS SI NO VIENEN PARAMETROS
+        if(parametros):
+            for p in parametros:
+                #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+                param = p.split('=')
+                tipo = param[0]
+                valor = param[1]
+                #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+                if (tipo == "path"):
+                    mo.path = valor 
+                elif (tipo == "name"):
+                    mo.name = valor 
+                else:
+                    print(">>>>Error: parámetro no aceptado en 'mount': "+valor.upper()+">>>>")
+                    print("*****************************************************************************")
+            #SE CREA EL MOUNT
+            mo.make_mount()
+        else:
+            #RECORRE EL MOUNT
+            mo.recorrer()
 
     def analizar_unmount(self, parametros):
         parametros.remove(parametros[0])
