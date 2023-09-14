@@ -5,7 +5,7 @@ from PIL import Image
 from PIL import ImageDraw 
 import pandas as pd
 import imgkit
-from estructuras import MBR
+from estructuras import EBR, MBR
 import singleton
 
 class rep:
@@ -66,8 +66,7 @@ class rep:
         mbr = self.obtener_mbr(path_Disco)
         fechaInt = mbr.date
         fechaStr = self.castear_fecha(fechaInt)
-        #t =  {'column1':["AA","BBBB","CCC","DDDDD"],'column2':[143.40,144.60,153.40,92.50],'column3':[144.21,142.60,155.65,92.77]}
-        #PASAR A DICCIONARIO
+        #OBTIENE LA DATA DEL MBR
         color = "Purple"
         dic_data = {'REPORTE MBR':[], 'non':[]}
         dic_data["REPORTE MBR"].append('mbr_tamano')
@@ -76,6 +75,8 @@ class rep:
         dic_data["non"].append(str(mbr.size))
         dic_data["non"].append(str(fechaStr))
         dic_data["non"].append(str(mbr.signature))
+        #OBTIENE LA DATA DE LAS PARTICIONES
+        self.data_partitions(dic_data,mbr,path_Disco)
         #LLAMAR METODO TABLA PASARLE EL DICCIONARIO Y EL COLOR
         self.reporte_tabla(dic_data,color)
         print(">>>>Reporte MBR generado exitosamente!>>>>")
@@ -157,9 +158,9 @@ class rep:
         cuadro = layout % df.to_html(index=False,justify='center')
         #CREA ARCHIVO TIPO PNG O JPG Y PEGA LA TABLA
         imgkit.from_string(cuadro, self.path, {"xvfb": ""})
-        img = Image.new('RGB', (800, 300), color = '#000080')
+        img = Image.new('RGB', (800, 1000), color = '#000080')
         draw = ImageDraw.Draw(img)
-        img_tabla = Image.open("tabla.png")
+        img_tabla = Image.open(self.path)
         img.paste(img_tabla, (50, 40), img_tabla)
 
     def obtener_path(self):
@@ -218,5 +219,52 @@ class rep:
                 self.path = palabra
         #print(self.path)
 
-
-
+    def data_partitions(self,dic_data, mbr, pathDisco):
+        for part in mbr.partitions:
+            dic_data["REPORTE MBR"].append('PARTICION')
+            dic_data["non"].append("VALUES")
+            #PRIMARIA O EXTENDIDA
+            dic_data["REPORTE MBR"].append('part_status')
+            dic_data["REPORTE MBR"].append('part_type')
+            dic_data["REPORTE MBR"].append('part_fit')
+            dic_data["REPORTE MBR"].append('part_start')
+            dic_data["REPORTE MBR"].append('part_size')
+            dic_data["REPORTE MBR"].append('part_name')
+            dic_data["non"].append(part.status)
+            dic_data["non"].append(part.type)
+            dic_data["non"].append(part.fit)
+            dic_data["non"].append(str(part.start))
+            dic_data["non"].append(str(part.s))
+            dic_data["non"].append(part.name)
+            #RECORRER LOGICAS SI ES EXTENDIDA
+            if(part.type == "e"):
+                ebr_act = EBR('n',' ',0,0,0,"                ")
+                bytes_act = ebr_act.get_bytes()
+                with open(pathDisco, "rb+") as file:
+                    #PRIMER EBR
+                    buscar = True
+                    file.seek(part.start)
+                    while(buscar):
+                        dic_data["REPORTE MBR"].append('LOGICA')
+                        dic_data["non"].append("VALUES")
+                        bytes_obtenidos = file.read(len(bytes_act))
+                        ebr_act.set_bytes(bytes_obtenidos)
+                        dic_data["REPORTE MBR"].append('part_status')
+                        dic_data["REPORTE MBR"].append('part_next')
+                        dic_data["REPORTE MBR"].append('part_fit')
+                        dic_data["REPORTE MBR"].append('part_start')
+                        dic_data["REPORTE MBR"].append('part_size')
+                        dic_data["REPORTE MBR"].append('part_name')
+                        dic_data["non"].append(ebr_act.status)
+                        dic_data["non"].append(str(ebr_act.nextB))
+                        dic_data["non"].append(ebr_act.fit)
+                        dic_data["non"].append(str(ebr_act.start))
+                        dic_data["non"].append(str(ebr_act.s))
+                        dic_data["non"].append(ebr_act.name)
+                        #SALE DEL BUCLE SI ES EL ULTIMO
+                        if(ebr_act.status == 'n'):
+                            buscar = False
+                        #ACTUALIZA EL PUNTERO
+                        else:
+                            position_ultimo = int(ebr_act.nextB)
+                            file.seek(position_ultimo)
