@@ -7,6 +7,7 @@ import pandas as pd
 import imgkit
 from estructuras import EBR, MBR
 import singleton
+from graphviz import dot
 
 class rep:
 
@@ -97,9 +98,12 @@ class rep:
         data = self.data_partitionsDisk(mbr,path_Disco)
         name_disk = directorio2[1]
         #CREAR SINTAXIS GRAPHVIZ DE LA DATA
-        self.graphviz_disk(name_disk,data)
+        contenido = self.graphviz_disk(name_disk,data)
+        #CREA ARCHIVO DOT Y LO EJECUTA
+        self.generar_graphviz(directorio,contenido)
         print(">>>>Reporte DISK generado exitosamente!>>>>")
         print("*****************************************************************************")
+
     def make_Rinode(self, directorio):
         print("reporte inode".upper())
     
@@ -296,13 +300,18 @@ class rep:
                 }    
                 }
             """
-        print(esquema)
+        #print(esquema)
+        return esquema
 
     def data_partitionsDisk(self,mbr,pathDisco):
         data = """"""
         for part in mbr.partitions:
+            #SI NO ESTA EN USO
             if((part.status == "n") or(part.status == "e")):
                 data += """|LIBRE"""
+            #SI ESTA ELIMINADA
+            #if(part.status == "e"):
+            #    data += """|LIBRE"""
             #SI ES PRIMARIA
             elif(part.type == "p"):
                 data += """|PRIMARIA"""
@@ -330,4 +339,12 @@ class rep:
                             data += """|"""
         return data
 
- 
+    def generar_graphviz(self, directorio,contenido):
+        di = directorio[0]
+        disklist = directorio[1].split('.')
+        name = disklist[0]
+        dir_completo = di+'/'+name+".dot"
+        with open(dir_completo, "w") as file:
+            file.write(contenido)
+        #GENERA LA IMAGEN
+        os.system('dot -T'+disklist[1]+' '+dir_completo+' -o '+directorio[0]+'/'+directorio[1])
