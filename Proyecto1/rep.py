@@ -76,7 +76,7 @@ class rep:
         dic_data["non"].append(str(fechaStr))
         dic_data["non"].append(str(mbr.signature))
         #OBTIENE LA DATA DE LAS PARTICIONES
-        self.data_partitions(dic_data,mbr,path_Disco)
+        self.data_partitionsMBR(dic_data,mbr,path_Disco)
         #LLAMAR METODO TABLA PASARLE EL DICCIONARIO Y EL COLOR
         self.reporte_tabla(dic_data,color)
         print(">>>>Reporte MBR generado exitosamente!>>>>")
@@ -84,7 +84,22 @@ class rep:
         
     def make_Rdisk(self, directorio):
         print("reporte disk".upper())
-    
+        #CREA EL PATH
+        self.verificarDirectorio()
+        # CREA DIRECTORIO EN CASO NO EXISTA
+        directorio = os.path.split(self.path)
+        os.makedirs(directorio[0], exist_ok=True)
+        #OBTIENE EL PATH DEL DISCO POR MEDIO DEL ID, OBTIENE EL MBR
+        path_Disco = self.obtener_path()
+        directorio2 = os.path.split(path_Disco)
+        mbr = self.obtener_mbr(path_Disco)
+        #RECORRER PARTICIONES 
+        data = self.data_partitionsDisk(mbr,path_Disco)
+        name_disk = directorio2[1]
+        #CREAR SINTAXIS GRAPHVIZ DE LA DATA
+        self.graphviz_disk(name_disk,data)
+        print(">>>>Reporte DISK generado exitosamente!>>>>")
+        print("*****************************************************************************")
     def make_Rinode(self, directorio):
         print("reporte inode".upper())
     
@@ -219,7 +234,7 @@ class rep:
                 self.path = palabra
         #print(self.path)
 
-    def data_partitions(self,dic_data, mbr, pathDisco):
+    def data_partitionsMBR(self,dic_data, mbr, pathDisco):
         for part in mbr.partitions:
             dic_data["REPORTE MBR"].append('PARTICION')
             dic_data["non"].append("VALUES")
@@ -268,3 +283,51 @@ class rep:
                         else:
                             position_ultimo = int(ebr_act.nextB)
                             file.seek(position_ultimo)
+
+    def graphviz_disk(self,name_disk,data):
+        esquema = """
+                digraph D {
+                subgraph cluster_1 {
+                label =  \""""+name_disk+"""\"
+                color=blue;
+
+                node [fontname="Arial",style=filled];
+                node_A [shape=record    label="MBR"""+data+"""\"];
+                }    
+                }
+            """
+        print(esquema)
+
+    def data_partitionsDisk(self,mbr,pathDisco):
+        data = """"""
+        for part in mbr.partitions:
+            if((part.status == "n") or(part.status == "e")):
+                data += """|LIBRE"""
+            #SI ES PRIMARIA
+            elif(part.type == "p"):
+                data += """|PRIMARIA"""
+            #RECORRER LOGICAS SI ES EXTENDIDA
+            elif(part.type == "e"):
+                data += """|{EXTENDIDA|{"""
+                ebr_act = EBR('n',' ',0,0,0,"                ")
+                bytes_act = ebr_act.get_bytes()
+                with open(pathDisco, "rb+") as file:
+                    #PRIMER EBR
+                    buscar = True
+                    file.seek(part.start)
+                    while(buscar):
+                        bytes_obtenidos = file.read(len(bytes_act))
+                        ebr_act.set_bytes(bytes_obtenidos)
+                        data += """EBR|LOGICA"""
+                        #SALE DEL BUCLE SI ES EL ULTIMO
+                        if(ebr_act.status == 'n'):
+                            buscar = False
+                            data += """}}"""
+                        #ACTUALIZA EL PUNTERO
+                        else:
+                            position_ultimo = int(ebr_act.nextB)
+                            file.seek(position_ultimo)
+                            data += """|"""
+        return data
+
+ 

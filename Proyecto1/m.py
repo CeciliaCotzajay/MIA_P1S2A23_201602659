@@ -11,10 +11,11 @@ import imgkit
 class m(object):
 
     def __init__(self):
-        self.presentar2()
+        #self.presentar2()
         #self.crear_rep2()
         #self.bytesss()
         #self.devolver_kb()
+        self.crear_gra()
         self.path = ""
 
     def presentar2(self):
@@ -239,8 +240,21 @@ class m(object):
         img_tabla = Image.open("tabla.png")
         img.paste(img_tabla, (50, 40), img_tabla)
 
- 
+    def crear_gra(self):
+        color = "disco22"
+        color2 = """|{EXTENDIDA|{EBR|LOGICA\nporncentaje}}|PRIMARIA\nporcentaje"""
+        esquema = """
+                digraph D {
+                subgraph cluster_1 {
+                label =  \""""+color+"""\"
+                color=blue;
 
+                node [fontname="Arial",style=filled];
+                node_A [shape=record    label="MBR"""+color2+"""\"];
+                }    
+                }
+            """
+        print(esquema)
 
 
 obj = m()
