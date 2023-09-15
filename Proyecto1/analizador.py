@@ -4,6 +4,7 @@ from fdisk import fdisk
 from rep import rep
 from mount import mount
 from unmount import unmount
+from mkfs import mkfs
 
 class analizador:
 
@@ -162,6 +163,28 @@ class analizador:
         else:
             self.analizar_pause()
 
+    def analizar_mkfs(self, parametros):
+        parametros.remove(parametros[0])
+        #INICIA
+        mk = mkfs() 
+        for p in parametros:
+             #SE OBTIENE EL TIPO Y EL PARAMETRO ACTUAL
+            param = p.split('=')
+            tipo = param[0]
+            valor = param[1]
+             #VERIFICA CUAL PARAMETRO ES PARA INICIALIZAR EL OBTJETO (LOS PARAMETROS YA VIENEN EN LOWERCASE)
+            if (tipo == "id"):
+                mk.ids = valor
+            elif (tipo == "type"):
+                mk.type = valor 
+            elif (tipo == "fs"):
+                mk.fs = valor 
+            else:
+                print(">>>>Error: parámetro no aceptado en 'mkfs': "+valor.upper()+">>>>")
+                print("*****************************************************************************")
+         #SE CREA 
+        mk.make_mkfs()
+
     def analizar(self, linea):
         nueva_linea = linea.replace(" ","")
         try:
@@ -192,6 +215,9 @@ class analizador:
             self.analizar_unmount(comandos)
         elif (token == "pause"):
             self.analizar_pause()
+        elif (token == "mkfs"):
+            print("comando mkfs".upper())
+            self.analizar_mkfs(comandos)
         elif (token == ""):
             print("", end='')
         else:
