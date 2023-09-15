@@ -135,6 +135,7 @@ class analizador:
         else:
             #RECORRE EL MOUNT
             mo.recorrer()
+            print("*****************************************************************************")
 
     def analizar_unmount(self, parametros):
         parametros.remove(parametros[0])
@@ -154,6 +155,13 @@ class analizador:
          #SE CREA EL DISCO
         mo.make_unmount()
     
+    def analizar_pause(self):
+        response = str(input("PAUSE [c]:  ")).lower()
+        if(response == 'c'):
+            print("", end='')
+        else:
+            self.analizar_pause()
+
     def analizar(self, linea):
         nueva_linea = linea.replace(" ","")
         try:
@@ -182,6 +190,8 @@ class analizador:
         elif (token == "unmount"):
             print("comando unmount".upper())
             self.analizar_unmount(comandos)
+        elif (token == "pause"):
+            self.analizar_pause()
         elif (token == ""):
             print("", end='')
         else:
